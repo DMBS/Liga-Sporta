@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using MovieCatalog.Models;
+using PagedList;
+using Microsoft.AspNet.Identity;
 
 namespace MovieCatalog.Controllers
 {
@@ -12,11 +15,54 @@ namespace MovieCatalog.Controllers
         private MoviesDBEntities entities = new MoviesDBEntities();
 
         // GET: Movie
-        public ActionResult Index()
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
             if (Request.IsAuthenticated)
             {
-                return View(entities.MovieSet.ToList());
+                ViewBag.CurrentSort = sortOrder;
+                ViewBag.NameSortParm = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+                ViewBag.RealesedDateSortParam = sortOrder == "Date" ? "date_desc" : "Date";
+                ViewBag.DirectorSortParam = sortOrder == "Director" ? "director_desc" : "Director";
+                ViewBag.UserSortParam = sortOrder == "User" ? "user_desc" : "User";
+
+                var movies = from s in entities.MovieSet
+                               select s;
+
+                switch (sortOrder)
+                {
+                    case "Name":
+                        movies = movies.OrderBy(s => s.Name);
+                        break;
+                    case "name_desc":
+                        movies = movies.OrderByDescending(s => s.Name);
+                        break;
+                    case "Date":
+                        movies = movies.OrderBy(s => s.DateReleased);
+                        break;
+                    case "date_desc":
+                        movies = movies.OrderByDescending(s => s.DateReleased);
+                        break;
+                    case "Director":
+                        movies = movies.OrderBy(s => s.Director);
+                        break;
+                    case "director_desc":
+                        movies = movies.OrderByDescending(s => s.Director);
+                        break;
+                    case "User":
+                        movies = movies.OrderBy(s => s.UserName);
+                        break;
+                    case "user_desc":
+                        movies = movies.OrderByDescending(s => s.UserName);
+                        break;
+                    default:  // Name ascending 
+                        movies = movies.OrderBy(s => s.Name);
+                        break;
+                }
+
+                int pageSize = 10;
+                int pageNumber = (page ?? 1);
+                return View(entities.MovieSet.OrderByDescending(x => x.Name).ToPagedList(pageNumber, pageSize));
+                //return View(entities.MovieSet.ToList());
             }
             else
             {
@@ -28,7 +74,12 @@ namespace MovieCatalog.Controllers
         // GET: Movie/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            Movie viewMovie = entities.MovieSet.Find(id);
+            if (viewMovie == null)
+            {
+                return HttpNotFound();
+            }
+            return View(viewMovie);
         }
 
         // GET: Movie/Create
@@ -63,45 +114,61 @@ namespace MovieCatalog.Controllers
         // GET: Movie/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            Movie movieToEdit = entities.MovieSet.Find(id);
+            if (movieToEdit == null)
+            {
+                return HttpNotFound();
+            }
+            return View(movieToEdit);
         }
 
         // POST: Movie/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(Movie movieToEdit)
+
         {
-            try
+
+            if(User.Identity.GetUserName() != movieToEdit.UserName)
             {
-                // TODO: Add update logic here
+                return new HttpUnauthorizedResult();
+            }
+
+            if (ModelState.IsValid)
+
+            {
+
+                entities.Entry(movieToEdit).State = EntityState.Modified;
+
+                entities.SaveChanges();
 
                 return RedirectToAction("Index");
+
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(movieToEdit);
+
         }
 
-        // GET: Movie/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+        //// GET: Movie/Delete/5
+        //public ActionResult Delete(int id)
+        //{
+        //    return View();
+        //}
 
-        // POST: Movie/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
+        //// POST: Movie/Delete/5
+        //[HttpPost]
+        //public ActionResult Delete(int id, FormCollection collection)
+        //{
+        //    try
+        //    {
+        //        // TODO: Add delete logic here
 
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        //        return RedirectToAction("Index");
+        //    }
+        //    catch
+        //    {
+        //        return View();
+        //    }
+        //}
     }
 }
