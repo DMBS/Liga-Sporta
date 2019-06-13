@@ -10,7 +10,14 @@ namespace MovieCatalog.Controllers
     {
         public ActionResult Index()
         {
-            return View();
+            if (Request.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Movie");
+            }
+            else
+            {
+                return View();
+            }
         }
 
     }
