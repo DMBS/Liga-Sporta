@@ -14,8 +14,16 @@ namespace MovieCatalog.Controllers
         // GET: Movie
         public ActionResult Index()
         {
-            return View(entities.MovieSet.ToList());
+            if (Request.IsAuthenticated)
+            {
+                return View(entities.MovieSet.ToList());
+            }
+            else
+            {
+                return View("Index", "Home");
+            }
         }
+
 
         // GET: Movie/Details/5
         public ActionResult Details(int id)
@@ -31,12 +39,19 @@ namespace MovieCatalog.Controllers
 
         // POST: Movie/Create
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        public ActionResult Create([Bind(Exclude = "Id")] Movie movie)
         {
             try
             {
                 // TODO: Add insert logic here
+                if (!ModelState.IsValid)
+                {
+                    return View();
+                }
 
+                movie.UserName = User.Identity.Name;
+                entities.MovieSet.Add(movie);
+                entities.SaveChanges();
                 return RedirectToAction("Index");
             }
             catch

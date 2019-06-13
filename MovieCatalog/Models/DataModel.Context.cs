@@ -26,5 +26,6 @@ namespace MovieCatalog.Models
         }
     
         public virtual DbSet<Movie> MovieSet { get; set; }
+
     }
 }
