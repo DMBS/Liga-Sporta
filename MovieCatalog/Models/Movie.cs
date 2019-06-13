@@ -11,13 +11,19 @@ namespace MovieCatalog.Models
 {
     using System;
     using System.Collections.Generic;
-    
+    using System.ComponentModel.DataAnnotations;
+
     public partial class Movie
     {
         public int Id { get; set; }
+        [Required]
         public string Name { get; set; }
+        [Required]
         public string Description { get; set; }
+        [Required]
+        [DataType(DataType.Date)]
         public System.DateTime DateReleased { get; set; }
+        [Required]
         public string Director { get; set; }
         public string UserName { get; set; }
         public byte[] Poster { get; set; }
