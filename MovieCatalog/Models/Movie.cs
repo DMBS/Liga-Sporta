@@ -22,6 +22,7 @@ namespace MovieCatalog.Models
         public string Description { get; set; }
         [Required]
         [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString ="{0:yyyy-MM-dd}", ApplyFormatInEditMode =true)]
         public System.DateTime DateReleased { get; set; }
         [Required]
         public string Director { get; set; }
