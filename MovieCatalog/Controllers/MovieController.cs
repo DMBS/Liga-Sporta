@@ -117,6 +117,10 @@ namespace MovieCatalog.Controllers
             {
                 return HttpNotFound();
             }
+            if (User.Identity.GetUserName() != movieToEdit.UserName)
+            {
+                TempData["Danger"] = "Each user can edit only their movies! Please Back to list and choose your movie.";
+            }
             return View(movieToEdit);
         }
 
