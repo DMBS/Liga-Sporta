@@ -14,20 +14,19 @@
 <table class="table">
     <tr>
         <th>
-            Name
-            @Html.ActionLink("^", "Index", new { sortOrder = ViewBag.NameSortParm }, new { style = "color:white" })
+            @Html.DisplayNameFor(model => model.FirstOrDefault().Name)
         </th>
         <th>
-            Description
+            @Html.DisplayNameFor(model => model.FirstOrDefault().Description)
         </th>
         <th>
-            @Html.ActionLink("Released Date", "Index", new { sortOrder = ViewBag.RealesedDateSortParam, currentFilter = ViewBag.CurrentFilter })
+            @Html.DisplayNameFor(model => model.FirstOrDefault().DateReleased)
         </th>
         <th>
-            @Html.ActionLink("Director", "Index", new { sortOrder = ViewBag.DirectorSortParam, currentFilter = ViewBag.CurrentFilter })
+            @Html.DisplayNameFor(model => model.FirstOrDefault().Director)
         </th>
         <th>
-            @Html.ActionLink("User", "Index", new { sortOrder = ViewBag.UserSortParam, currentFilter = ViewBag.CurrentFilter })
+            @Html.DisplayNameFor(model => model.FirstOrDefault().UserName)
         </th>
         <th></th>
     </tr>

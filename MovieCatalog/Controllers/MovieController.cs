@@ -16,49 +16,49 @@ namespace MovieCatalog.Controllers
         private MoviesDBEntities entities = new MoviesDBEntities();
 
         // GET: Movie
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
+        public ActionResult Index( int? page)
         {
             if (Request.IsAuthenticated)
             {
-                ViewBag.CurrentSort = sortOrder;
-                ViewBag.NameSortParm = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-                ViewBag.RealesedDateSortParam = sortOrder == "Date" ? "date_desc" : "Date";
-                ViewBag.DirectorSortParam = sortOrder == "Director" ? "director_desc" : "Director";
-                ViewBag.UserSortParam = sortOrder == "User" ? "user_desc" : "User";
+                //ViewBag.CurrentSort = sortOrder;
+                //ViewBag.NameSortParm = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+                //ViewBag.RealesedDateSortParam = sortOrder == "Date" ? "date_desc" : "Date";
+                //ViewBag.DirectorSortParam = sortOrder == "Director" ? "director_desc" : "Director";
+                //ViewBag.UserSortParam = sortOrder == "User" ? "user_desc" : "User";
 
-                var movies = from s in entities.MovieSet
-                               select s;
+                //var movies = from s in entities.MovieSet
+                //               select s;
 
-                switch (sortOrder)
-                {
-                    case "Name":
-                        movies = movies.OrderBy(s => s.Name);
-                        break;
-                    case "name_desc":
-                        movies = movies.OrderByDescending(s => s.Name);
-                        break;
-                    case "Date":
-                        movies = movies.OrderBy(s => s.DateReleased);
-                        break;
-                    case "date_desc":
-                        movies = movies.OrderByDescending(s => s.DateReleased);
-                        break;
-                    case "Director":
-                        movies = movies.OrderBy(s => s.Director);
-                        break;
-                    case "director_desc":
-                        movies = movies.OrderByDescending(s => s.Director);
-                        break;
-                    case "User":
-                        movies = movies.OrderBy(s => s.UserName);
-                        break;
-                    case "user_desc":
-                        movies = movies.OrderByDescending(s => s.UserName);
-                        break;
-                    default:  // Name ascending 
-                        movies = movies.OrderBy(s => s.Name);
-                        break;
-                }
+                //switch (sortOrder)
+                //{
+                //    case "Name":
+                //        movies = movies.OrderBy(s => s.Name);
+                //        break;
+                //    case "name_desc":
+                //        movies = movies.OrderByDescending(s => s.Name);
+                //        break;
+                //    case "Date":
+                //        movies = movies.OrderBy(s => s.DateReleased);
+                //        break;
+                //    case "date_desc":
+                //        movies = movies.OrderByDescending(s => s.DateReleased);
+                //        break;
+                //    case "Director":
+                //        movies = movies.OrderBy(s => s.Director);
+                //        break;
+                //    case "director_desc":
+                //        movies = movies.OrderByDescending(s => s.Director);
+                //        break;
+                //    case "User":
+                //        movies = movies.OrderBy(s => s.UserName);
+                //        break;
+                //    case "user_desc":
+                //        movies = movies.OrderByDescending(s => s.UserName);
+                //        break;
+                //    default:  // Name ascending 
+                //        movies = movies.OrderBy(s => s.Name);
+                //        break;
+                //}
 
                 int pageSize = 10;
                 int pageNumber = (page ?? 1);
