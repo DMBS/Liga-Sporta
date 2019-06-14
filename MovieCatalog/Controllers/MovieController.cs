@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using MovieCatalog.Models;
 using PagedList;
 using Microsoft.AspNet.Identity;
+using System.IO;
 
 namespace MovieCatalog.Controllers
 {
@@ -90,25 +91,22 @@ namespace MovieCatalog.Controllers
 
         // POST: Movie/Create
         [HttpPost]
-        public ActionResult Create([Bind(Exclude = "Id")] Movie movie)
+        public ActionResult Create([Bind(Exclude = "Id,poster")] Movie movie, HttpPostedFileBase poster)
         {
-            try
+            if (ModelState.IsValid)
             {
-                // TODO: Add insert logic here
-                if (!ModelState.IsValid)
+                if (poster != null)
                 {
-                    return View();
+                    movie.Poster = new byte[poster.ContentLength];
+                    poster.InputStream.Read(movie.Poster, 0, poster.ContentLength);
                 }
-
                 movie.UserName = User.Identity.Name;
                 entities.MovieSet.Add(movie);
                 entities.SaveChanges();
                 return RedirectToAction("Index");
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(movie);
         }
 
         // GET: Movie/Edit/5

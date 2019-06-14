@@ -169,6 +169,11 @@ fieldset {
   margin: 0 2px;
   border: 1px solid #c0c0c0;
 }
+
+.lines {
+    margin-bottom: 15px;
+}
+
 legend {
   padding: 0;
   border: 0;
