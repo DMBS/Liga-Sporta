@@ -1,69 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNet.Identity;
+using MovieCatalog.Models;
+using PagedList;
 using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using MovieCatalog.Models;
-using PagedList;
-using Microsoft.AspNet.Identity;
-using System.IO;
 
 namespace MovieCatalog.Controllers
 {
+
     public class MovieController : Controller
     {
+        #region Private
+
         private MoviesDBEntities entities = new MoviesDBEntities();
 
-        // GET: Movie
-        public ActionResult Index( int? page)
+        private bool CanUserEditMovie(Movie movieToEdit)
+        {
+            if (User.Identity.GetUserName() != movieToEdit.UserName)
+            {
+                TempData["Danger"] = "Each user can edit only their movies! Please Back to list and choose your movie.";
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
+
+        #region GET: Index
+
+        /// <summary>
+        /// GET: list of movies
+        /// </summary>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public ActionResult Index(int? page)
         {
             if (Request.IsAuthenticated)
             {
-                //ViewBag.CurrentSort = sortOrder;
-                //ViewBag.NameSortParm = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-                //ViewBag.RealesedDateSortParam = sortOrder == "Date" ? "date_desc" : "Date";
-                //ViewBag.DirectorSortParam = sortOrder == "Director" ? "director_desc" : "Director";
-                //ViewBag.UserSortParam = sortOrder == "User" ? "user_desc" : "User";
-
-                //var movies = from s in entities.MovieSet
-                //               select s;
-
-                //switch (sortOrder)
-                //{
-                //    case "Name":
-                //        movies = movies.OrderBy(s => s.Name);
-                //        break;
-                //    case "name_desc":
-                //        movies = movies.OrderByDescending(s => s.Name);
-                //        break;
-                //    case "Date":
-                //        movies = movies.OrderBy(s => s.DateReleased);
-                //        break;
-                //    case "date_desc":
-                //        movies = movies.OrderByDescending(s => s.DateReleased);
-                //        break;
-                //    case "Director":
-                //        movies = movies.OrderBy(s => s.Director);
-                //        break;
-                //    case "director_desc":
-                //        movies = movies.OrderByDescending(s => s.Director);
-                //        break;
-                //    case "User":
-                //        movies = movies.OrderBy(s => s.UserName);
-                //        break;
-                //    case "user_desc":
-                //        movies = movies.OrderByDescending(s => s.UserName);
-                //        break;
-                //    default:  // Name ascending 
-                //        movies = movies.OrderBy(s => s.Name);
-                //        break;
-                //}
-
                 int pageSize = 10;
                 int pageNumber = (page ?? 1);
-                return View(entities.MovieSet.OrderByDescending(x => x.Name).ToPagedList(pageNumber, pageSize));
-                //return View(entities.MovieSet.ToList());
+                return View(entities.MovieSet.OrderBy(x => x.Name).ToPagedList(pageNumber, pageSize));
             }
             else
             {
@@ -71,8 +49,15 @@ namespace MovieCatalog.Controllers
             }
         }
 
+        #endregion
 
-        // GET: Movie/Details/5
+        #region GET: Details
+
+        /// <summary>
+        /// GET: View movie
+        /// </summary>
+        /// <param name="id">Movie id</param>
+        /// <returns></returns>
         public ActionResult Details(int id)
         {
             Movie viewMovie = entities.MovieSet.Find(id);
@@ -83,18 +68,35 @@ namespace MovieCatalog.Controllers
             return View(viewMovie);
         }
 
-        // GET: Movie/Create
+        #endregion
+
+        #region GET: Create
+
+        /// <summary>
+        /// GET: Create new movie
+        /// </summary>
+        /// <returns></returns>
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: Movie/Create
+        #endregion
+
+        #region POST: Create
+
+        /// <summary>
+        /// POST: Create new movie
+        /// </summary>
+        /// <param name="movie">movie</param>
+        /// <param name="poster">poster</param>
+        /// <returns></returns>
         [HttpPost]
-        public ActionResult Create([Bind(Exclude = "Id,poster")] Movie movie, HttpPostedFileBase poster)
+        public ActionResult Create([Bind(Exclude = "Id, poster")] Movie movie, HttpPostedFileBase poster)
         {
             if (ModelState.IsValid)
             {
+                // if poster != null, save image in localDB
                 if (poster != null)
                 {
                     movie.Poster = new byte[poster.ContentLength];
@@ -109,7 +111,15 @@ namespace MovieCatalog.Controllers
             return View(movie);
         }
 
-        // GET: Movie/Edit/5
+        #endregion
+
+        #region GET: Edit
+
+        /// <summary>
+        /// Edit movie
+        /// </summary>
+        /// <param name="id">movie id</param>
+        /// <returns></returns>
         public ActionResult Edit(int id)
         {
             Movie movieToEdit = entities.MovieSet.Find(id);
@@ -117,60 +127,37 @@ namespace MovieCatalog.Controllers
             {
                 return HttpNotFound();
             }
-            if (User.Identity.GetUserName() != movieToEdit.UserName)
-            {
-                TempData["Danger"] = "Each user can edit only their movies! Please Back to list and choose your movie.";
-            }
+            //Check User rights to Edit movie
+            CanUserEditMovie(movieToEdit);
+
             return View(movieToEdit);
         }
 
-        // POST: Movie/Edit/5
+        #endregion
+
+        #region POST: Edit
+
+        /// <summary>
+        /// POST: Edit movie
+        /// </summary>
+        /// <param name="movieToEdit">Movie id</param>
+        /// <returns></returns>
         [HttpPost]
         public ActionResult Edit(Movie movieToEdit)
-
         {
-
-            if(User.Identity.GetUserName() != movieToEdit.UserName)
+            if (User.Identity.GetUserName() != movieToEdit.UserName)
             {
                 return new HttpUnauthorizedResult();
             }
-
             if (ModelState.IsValid)
-
             {
-
                 entities.Entry(movieToEdit).State = EntityState.Modified;
-
                 entities.SaveChanges();
-
                 return RedirectToAction("Index");
-
             }
-
             return View(movieToEdit);
-
         }
 
-        //// GET: Movie/Delete/5
-        //public ActionResult Delete(int id)
-        //{
-        //    return View();
-        //}
-
-        //// POST: Movie/Delete/5
-        //[HttpPost]
-        //public ActionResult Delete(int id, FormCollection collection)
-        //{
-        //    try
-        //    {
-        //        // TODO: Add delete logic here
-
-        //        return RedirectToAction("Index");
-        //    }
-        //    catch
-        //    {
-        //        return View();
-        //    }
-        //}
+        #endregion
     }
 }
