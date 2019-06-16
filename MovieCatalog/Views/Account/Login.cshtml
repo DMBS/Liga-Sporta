@@ -4,6 +4,25 @@
     ViewBag.Title = "Log in";
 }
 
+<div class="container" style="padding-top: 50px;">
+    <div class="row">
+        @if (TempData["RedirectReason"] == "Unauthorized")
+        {
+            <div class="alert alert-danger" style="padding:0px">
+                <strong>"Each user can edit only their movies! Please Back to list and choose your movie."</strong>
+            </div>
+        }
+        <script type="text/javascript">
+            window.setTimeout(function () {
+                $(".alert-danger").fadeTo(500, 0).slideUp(500, function () {
+                    $(this).remove();
+                });
+            }, 5000);
+        </script>
+    </div>
+</div>
+
+
 <h2>@ViewBag.Title.</h2>
 <div class="row">
     <div class="col-md-8">
@@ -52,10 +71,10 @@
         </section>
     </div>
     @*<div class="col-md-4">
-        <section id="socialLoginForm">
-            @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
-        </section>
-    </div>*@
+            <section id="socialLoginForm">
+                @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
+            </section>
+        </div>*@
 </div>
 
 @section Scripts {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNet.Identity;
 using MovieCatalog.Models;
+using MovieCatalog.Attributes;
 using PagedList;
 using System.Data.Entity;
 using System.Linq;
@@ -14,17 +15,6 @@ namespace MovieCatalog.Controllers
         #region Private
 
         private MoviesDBEntities entities = new MoviesDBEntities();
-
-        private bool CanUserEditMovie(Movie movieToEdit)
-        {
-            if (User.Identity.GetUserName() != movieToEdit.UserName)
-            {
-                TempData["Danger"] = "Each user can edit only their movies! Please Back to list and choose your movie.";
-                return false;
-            }
-
-            return true;
-        }
 
         #endregion
 
@@ -120,6 +110,7 @@ namespace MovieCatalog.Controllers
         /// </summary>
         /// <param name="id">movie id</param>
         /// <returns></returns>
+        [MovieAuthorized]
         public ActionResult Edit(int id)
         {
             Movie movieToEdit = entities.MovieSet.Find(id);
@@ -127,8 +118,6 @@ namespace MovieCatalog.Controllers
             {
                 return HttpNotFound();
             }
-            //Check User rights to Edit movie
-            CanUserEditMovie(movieToEdit);
 
             return View(movieToEdit);
         }
@@ -145,10 +134,6 @@ namespace MovieCatalog.Controllers
         [HttpPost]
         public ActionResult Edit(Movie movieToEdit)
         {
-            if (User.Identity.GetUserName() != movieToEdit.UserName)
-            {
-                return new HttpUnauthorizedResult();
-            }
             if (ModelState.IsValid)
             {
                 entities.Entry(movieToEdit).State = EntityState.Modified;
