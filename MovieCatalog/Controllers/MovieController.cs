@@ -35,7 +35,7 @@ namespace MovieCatalog.Controllers
             }
             else
             {
-                return View("Index", "Home");
+                return RedirectToAction("Index", "Home");
             }
         }
 
