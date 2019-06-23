@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNet.Identity;
-using MovieCatalog.Models;
+using MovieCatalog.DomainModels;
 using MovieCatalog.Attributes;
 using PagedList;
 using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using AutoMapper;
+using MovieCatalog.ViewModels;
+using System.Collections.Generic;
 
 namespace MovieCatalog.Controllers
 {
@@ -50,12 +53,15 @@ namespace MovieCatalog.Controllers
         /// <returns></returns>
         public ActionResult Details(int id)
         {
-            Movie viewMovie = entities.MovieSet.Find(id);
-            if (viewMovie == null)
+            Movie movieFromDB = entities.MovieSet.Find(id);
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<Movie, MovieViewModel>()).CreateMapper();
+            MovieViewModel movieViewModel = mapper.Map<Movie, MovieViewModel>(movieFromDB);
+
+            if (movieViewModel == null)
             {
                 return HttpNotFound();
             }
-            return View(viewMovie);
+            return View(movieViewModel);
         }
 
         #endregion
@@ -82,7 +88,7 @@ namespace MovieCatalog.Controllers
         /// <param name="poster">poster</param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Create([Bind(Exclude = "Id, poster")] Movie movie, HttpPostedFileBase poster)
+        public ActionResult Create([Bind(Exclude = "Poster")]MovieViewModel movie, HttpPostedFileBase poster)
         {
             if (ModelState.IsValid)
             {
@@ -92,8 +98,12 @@ namespace MovieCatalog.Controllers
                     movie.Poster = new byte[poster.ContentLength];
                     poster.InputStream.Read(movie.Poster, 0, poster.ContentLength);
                 }
-                movie.UserName = User.Identity.Name;
-                entities.MovieSet.Add(movie);
+
+                var mapper = new MapperConfiguration(cfg => cfg.CreateMap<MovieViewModel, Movie>()).CreateMapper();
+                Movie movieSaveInDB = mapper.Map<MovieViewModel, Movie> (movie);
+
+                movieSaveInDB.UserName = User.Identity.Name;
+                entities.MovieSet.Add(movieSaveInDB);
                 entities.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -110,16 +120,19 @@ namespace MovieCatalog.Controllers
         /// </summary>
         /// <param name="id">movie id</param>
         /// <returns></returns>
-        [MovieAuthorized]
+        //[MovieAuthorized]
         public ActionResult Edit(int id)
         {
             Movie movieToEdit = entities.MovieSet.Find(id);
-            if (movieToEdit == null)
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<Movie, MovieViewModel>()).CreateMapper();
+            MovieViewModel movieViewModel = mapper.Map<Movie, MovieViewModel>(movieToEdit);
+
+            if (movieViewModel == null)
             {
                 return HttpNotFound();
             }
 
-            return View(movieToEdit);
+            return View(movieViewModel);
         }
 
         #endregion
@@ -132,11 +145,14 @@ namespace MovieCatalog.Controllers
         /// <param name="movieToEdit">Movie id</param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Edit(Movie movieToEdit)
+        public ActionResult Edit(MovieViewModel movieToEdit)
         {
             if (ModelState.IsValid)
             {
-                entities.Entry(movieToEdit).State = EntityState.Modified;
+
+                var mapper = new MapperConfiguration(cfg => cfg.CreateMap<MovieViewModel, Movie>()).CreateMapper();
+                Movie movieSaveInDB = mapper.Map<MovieViewModel, Movie>(movieToEdit); 
+                entities.Entry(movieSaveInDB).State = EntityState.Modified;
                 entities.SaveChanges();
                 return RedirectToAction("Index");
             }

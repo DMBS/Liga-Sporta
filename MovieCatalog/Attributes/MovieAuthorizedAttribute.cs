@@ -1,4 +1,4 @@
-﻿using MovieCatalog.Models;
+﻿using MovieCatalog.DomainModels;
 using System;
 using System.Web;
 using System.Web.Mvc;
